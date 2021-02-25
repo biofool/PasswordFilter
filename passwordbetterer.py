@@ -7,13 +7,13 @@ flask run
 """
 # def passworddecensy(password):
 import sqlite3
-
-#     # Use a breakpoint in the code line below to debug your script.
-#     print(f'Hi, {password}')  # Press ⌘F8 to toggle the breakpoint.
 from flask import Flask, render_template, request, url_for, flash, redirect
 from werkzeug.exceptions import abort
 import random
 import string
+
+compromised = ()
+
 
 def get_random_string(length: int) -> object:
     """
@@ -27,7 +27,19 @@ def get_random_string(length: int) -> object:
     #     result_str = get_random_string(length)
     return result_str
 
-badwords = ()
+
+def init(custombadwordfile):
+    global compromised
+    if custombadwordfile:
+        badwordfile = custombadwordfile
+    else:
+        badwordfile = '10-million-password-list-top-1000000.txt'
+    with open(badwordfile) as compromised10K:
+        compromised = set(map(str.rstrip, compromised10K))
+    return '{} compromised passwords injested', len(compromised)
+    # Validate
+
+
 app = Flask(__name__)
 app.config['SECRET_KEY'] = get_random_string(15)
 
@@ -56,6 +68,8 @@ def index():
     conn = get_db_connection()
     posts = conn.execute('SELECT * FROM posts').fetchall()
     conn.close()
+    if len(compromised) == 0:
+        init("10-million-password-list-top-1000000.txt")
 
     return render_template('index.html')
 
@@ -70,15 +84,17 @@ def post(post_id):
 @app.route('/create', methods=('GET', 'POST'))
 def create():
     if request.method == 'POST':
-        title = request.form['user']
-        content = request.form['password']
+        title = request.form ['user']
+        content = request.form ['password']
 
         if not title:
             flash('User is required!')
-        else:
-            if (len(content) > 8) or (content in badwords):
-                flash("Password length must exceed 8 characters and not be in the list of most commonly used passwords")
+        elif len(content) < 8:
+            flash("Password length must exceed 8 characters")
 
+        elif content in compromised:
+            flash("That password is in the list of most commonly used passwords and is banned")
+        else:
             conn = get_db_connection()
             conn.execute('INSERT INTO posts (title, content) VALUES (?, ?)',
                          (title, content))
@@ -94,8 +110,8 @@ def edit(id):
     post = get_post(id)
 
     if request.method == 'POST':
-        title = request.form['title']
-        content = request.form['content']
+        title = request.form ['title']
+        content = request.form ['content']
 
         if not title:
             flash('Title is required!')
