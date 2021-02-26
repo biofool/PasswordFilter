@@ -12,6 +12,8 @@ from werkzeug.exceptions import abort
 import random
 import string
 
+MinPasswordLen = 14
+#  Modify banned password set to ignore passwords shorter than MinPasswordLen
 compromised = ()
 
 
@@ -83,13 +85,19 @@ def post(post_id):
 
 @app.route('/create', methods=('GET', 'POST'))
 def create():
+    if request.method == 'GET':
+        msg = 'Your suggested password is ', get_random_string(15)
+        flash(msg)
+
     if request.method == 'POST':
         title = request.form ['user']
         content = request.form ['password']
 
         if not title:
             flash('User is required!')
-        elif len(content) < 8:
+        elif len(content) < MinPasswordLen:
+            flash("Password length must exceed 8 characters")
+        elif len(content) < MinPasswordLen:
             flash("Password length must exceed 8 characters")
 
         elif content in compromised:
@@ -107,6 +115,8 @@ def create():
 @app.route('/<int:id>/edit', methods=('GET', 'POST'))
 def edit(id):
     post = get_post(id)
+    msg = 'Your suggested password is', get_random_string(15)
+    flash(msg)
 
     if request.method == 'POST':
         title = request.form ['title']
