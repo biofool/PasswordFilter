@@ -15,4 +15,4 @@ COPY templates /home/ubuntu/
 
 WORKDIR /home/ubuntu/
 EXPOSE 8080
-#CMD ["/usr/bin/gunicorn", "-c", "passwordbetterer.py", "wsgi:hello"]
+CMD ["/usr/bin/gunicorn", "-c", "passwordbetterer.py", "wsgi:hello"]
