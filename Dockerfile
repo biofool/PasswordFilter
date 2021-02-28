@@ -1,18 +1,17 @@
-# VERSION 1.0
-# AUTHOR: Phil Chen
-# DOCKER HUB: https://hub.docker.com/u/nethacker
-# DESCRIPTION: A scalable Flask application using Gunicorn on Ubuntu 18.04 Docker example.
-# SOURCE: https://github.com/nethacker/ubuntu-flask-gunicorn-docker
+FROM ubuntu:20.10
 
-FROM nethacker/ubuntu-18-04-python-3:python-3.7.3
-COPY requirements.txt /root/
-RUN pip install -r /root/requirements.txt && useradd -m ubuntu
-ENV HOME=/home/ubuntu
-USER ubuntu
-COPY *.py /home/ubuntu/
-COPY static /home/ubuntu/
-COPY templates /home/ubuntu/
+RUN apt-get update -y && \
+    apt-get install -y python3-pip python3
 
-WORKDIR /home/ubuntu/
-EXPOSE 8080
-CMD ["gunicorn", "-c", "passwordbetterer.py", "wsgi:hello"]
+# We copy just the requirements.txt first to leverage Docker cache
+COPY ./requirements.txt /app/requirements.txt
+
+WORKDIR /app
+
+RUN pip install -r requirements.txt
+
+COPY . /app
+
+ENTRYPOINT [ "python" ]
+
+CMD [ "app.py" ]
