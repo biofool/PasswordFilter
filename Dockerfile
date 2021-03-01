@@ -1,17 +1,6 @@
-FROM ubuntu:20.10
-
-RUN apt-get update -y && \
-    apt-get install -y python3-pip python3-flask
-
-# We copy just the requirements.txt first to leverage Docker cache
-COPY ./requirements.txt /app/requirements.txt
-
+FROM python:3.6
+ADD . /app
 WORKDIR /app
-
-RUN pip install -r requirements.txt
-ENV FLASK_APP=app.py
-COPY . /app
-
-ENTRYPOINT [ "flask" ]
-
-CMD [ "run" ]
+RUN pip install -r PasswordFilter/requirements.txt
+EXPOSE 8000
+CMD ["gunicorn", "PasswordFilter.app:app"]
