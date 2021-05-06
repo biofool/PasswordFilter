@@ -73,6 +73,7 @@ def index():
     if len(compromised) == 0:
         init("10-million-user_pw-list-top-1000000.txt")
 
+
     return render_template('index.html')
 
 
