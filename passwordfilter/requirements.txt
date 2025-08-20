@@ -25,5 +25,5 @@ wheel==0.40.0
 cryptography~=3.3.1
 py==1.11.0
 lxml==4.9.2
-setuptools==67.7.2
+setuptools==78.1.1
 progress~=1.5
